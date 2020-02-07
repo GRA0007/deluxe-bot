@@ -1,0 +1,9 @@
+mechanize
+bs4
+html2text
+Wand
+Pillow
+discord.py
+requests
+numpy
+lxml
