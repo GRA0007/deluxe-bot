@@ -1,7 +1,6 @@
 mechanize
 bs4
-html2text
-Wand
+CairoSVG
 Pillow
 discord.py
 requests
