@@ -4,8 +4,7 @@ Watches a discord channel for a number and attempts to search for that as a frie
 
 ## Setup
 
-1. Install rsvg-convert.
-2. Install Imagemagick with `--with-rsvg=yes`.
-3. Run `pip install -r requirements.txt` to install the requirements.
-4. Set the environment variables `SEGA_ID`, `SEGA_PASS`, and `BOT_KEY`. (Note: The sega account used must have played maimai dx in both regions)
-5. Run `python bot.py` to start the bot.
+1. Copy `meiryo.ttc` and `meiryob.ttc` into the `fonts` directory. You may source this from a Windows installation.
+2. Build the image using `docker build -t deluxe-bot .`
+3. Edit the `env` file to set your SEGA ID credentials and bot token
+4. Start up a container using `docker container run --env-file env deluxe-bot:latest`

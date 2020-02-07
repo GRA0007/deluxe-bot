@@ -6,7 +6,6 @@ from cairosvg import svg2png
 from PIL import Image
 import requests
 from io import BytesIO
-import numpy
 
 # Import scraper
 import scraper

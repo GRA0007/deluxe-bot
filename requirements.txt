@@ -1,8 +1,7 @@
 mechanize
 bs4
-CairoSVG
-Pillow
+cairosvg
+pillow
 discord.py
 requests
-numpy
 lxml
