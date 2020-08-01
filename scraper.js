@@ -18,7 +18,7 @@ const jp_login = 'https://maimaidx.jp/maimai-mobile/';
 const jp_search = 'https://maimaidx.jp/maimai-mobile/friend/search/searchUser/?friendCode=';
 
 async function getUser(user_id, jp) {
-	const browser = await puppeteer.launch();
+	const browser = await puppeteer.launch({'args': ['--no-sandbox', '--disable-setuid-sandbox']});
 	const page = await browser.newPage();
 	let user = null;
 
