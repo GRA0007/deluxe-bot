@@ -1,0 +1,6 @@
+{
+	"token": "BOT_TOKEN_HERE",
+	"sega_id": "SEGA_ID",
+	"sega_pass": "SEGA_PASS",
+	"channel_id": "CHANNEL_TO_SEARCH"
+}
