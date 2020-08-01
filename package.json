@@ -1,0 +1,15 @@
+{
+  "name": "deluxe-bot",
+  "version": "2.0.0",
+  "description": "Scrapes Maimai profile information",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ben Grant",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "puppeteer": "^5.2.1"
+  }
+}
