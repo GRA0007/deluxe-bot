@@ -1,5 +1,15 @@
 const puppeteer = require('puppeteer');
-const config = require('./config.json');
+let config = {};
+try {
+	config = require('./config.json');
+} catch (e) {
+	config = {
+		token: process.env.token,
+		sega_id: process.env.sega_id,
+		sega_pass: process.env.sega_pass,
+		channel_id: process.env.channel_id
+	};
+}
 
 const intl_login = 'https://lng-tgk-aime-gw.am-all.net/common_auth/login?site_id=maimaidxex&redirect_url=https://maimaidx-eng.com/maimai-mobile/&back_url=https://maimai.sega.com/';
 const intl_search = 'https://maimaidx-eng.com/maimai-mobile/friend/search/searchUser/?friendCode=';

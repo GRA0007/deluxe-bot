@@ -1,9 +1,20 @@
 var fs = require('fs');
 const Discord = require('discord.js');
 const puppeteer = require('puppeteer');
-const config = require('./config.json');
 const colors = require('./colors.json');
 const { getUser } = require('./scraper');
+
+let config = {};
+try {
+	config = require('./config.json');
+} catch (e) {
+	config = {
+		token: process.env.token,
+		sega_id: process.env.sega_id,
+		sega_pass: process.env.sega_pass,
+		channel_id: process.env.channel_id
+	};
+}
 
 const client = new Discord.Client();
 
