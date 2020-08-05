@@ -16,59 +16,54 @@ try {
 	};
 }
 
-let browser;
-let page;
+let SVG;
 
 const client = new Discord.Client();
 
 client.on('ready', async () => {
 	console.log(`Logged in as ${client.user.tag}!`);
-	browser = await puppeteer.launch({'args': ['--no-sandbox', '--disable-setuid-sandbox']});
+	const browser = await puppeteer.launch({'args': ['--no-sandbox', '--disable-setuid-sandbox']});
+	page = await browser.newPage();
+	const content = fs.readFileSync(__dirname + '/template.svg', 'utf8');
+	await page.setContent(content);
+	SVG = await page.$("svg");
 	client.user.setActivity('Searching for codes');
 });
 
 async function renderProfile(user) {
-	if (!page)
-		page = await browser.newPage();
-
-	const svg = fs.readFileSync(__dirname + '/template.svg', 'utf8');
-
-	await page.setContent(svg);
-
-	// Add content
-	let element = await page.$("svg");
-	await element.evaluate((svg, user, colors) => {
+	// Replace content
+	await SVG.evaluate((element, user, colors) => {
 		let rank_type = user['rating_base'].split('/').pop();
-		svg.querySelector('#rank_bg').style.fill = colors.rank_colors[rank_type]['fill'];
-		svg.querySelector('#rank_border').style.fill = colors.rank_colors[rank_type]['border'];
-		svg.querySelector('#rank_shadow').style.fill = colors.rank_colors[rank_type]['border'];
+		element.querySelector('#rank_bg').style.fill = colors.rank_colors[rank_type]['fill'];
+		element.querySelector('#rank_border').style.fill = colors.rank_colors[rank_type]['border'];
+		element.querySelector('#rank_shadow').style.fill = colors.rank_colors[rank_type]['border'];
 
-		svg.querySelector('#trophy_bg').style.fill = `url(#${user['trophy_status']})`;
-		svg.querySelector('#trophy_border').style.fill = colors.trophy_colors[user['trophy_status']]['border'];
-		svg.querySelector('#trophy_shadow').style.fill = colors.trophy_colors[user['trophy_status']]['border'];
+		element.querySelector('#trophy_bg').style.fill = `url(#${user['trophy_status']})`;
+		element.querySelector('#trophy_border').style.fill = colors.trophy_colors[user['trophy_status']]['border'];
+		element.querySelector('#trophy_shadow').style.fill = colors.trophy_colors[user['trophy_status']]['border'];
 
 		let imageLoad = new Promise((resolve, reject) => {
-			let image = svg.querySelector('#Image');
+			let image = element.querySelector('#Image');
 			image.onload = () => resolve();
 			image.onerror = () => reject();
 			image.href.baseVal = user['image'];
 		});
 		let gradeLoad = new Promise((resolve, reject) => {
-			let grade = svg.querySelector('#Grade');
+			let grade = element.querySelector('#Grade');
 			grade.onload = () => resolve();
 			grade.onerror = () => reject();
 			grade.href.baseVal = user['grade'];
 		});
-		svg.querySelector('#Trophy').innerHTML = user['trophy'];
-		svg.querySelector('#Username').innerHTML = user['name'];
-		svg.querySelector('#Rank').innerHTML = user['rating'];
-		svg.querySelector('#Max_rank').innerHTML = 'MAX：' + user['rating_max'];
-		svg.querySelector('#Stars').innerHTML = user['stars'];
-		svg.querySelector('#Comment').innerHTML = user['comment'];
+		element.querySelector('#Trophy').innerHTML = user['trophy'];
+		element.querySelector('#Username').innerHTML = user['name'];
+		element.querySelector('#Rank').innerHTML = user['rating'];
+		element.querySelector('#Max_rank').innerHTML = 'MAX：' + user['rating_max'];
+		element.querySelector('#Stars').innerHTML = user['stars'];
+		element.querySelector('#Comment').innerHTML = user['comment'];
 		return Promise.all([imageLoad, gradeLoad]);
 	}, user, colors);
 
-	return await element.screenshot({type: 'png'});
+	return await SVG.screenshot({type: 'png'});
 }
 
 client.on('message', async message => {
