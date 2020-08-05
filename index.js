@@ -2,9 +2,9 @@ var fs = require('fs');
 const Discord = require('discord.js');
 const puppeteer = require('puppeteer');
 const colors = require('./colors.json');
-const { getUser } = require('./scraper');
+const { getUser, intl_friend_url, jp_friend_url } = require('./scraper');
 
-let config = {};
+let config;
 try {
 	config = require('./config.json');
 } catch (e) {
@@ -16,44 +16,59 @@ try {
 	};
 }
 
+let browser;
+let page;
+
 const client = new Discord.Client();
 
-client.on('ready', () => {
+client.on('ready', async () => {
 	console.log(`Logged in as ${client.user.tag}!`);
-	client.user.setActivity('searching for codes');
+	browser = await puppeteer.launch({'args': ['--no-sandbox', '--disable-setuid-sandbox']});
+	client.user.setActivity('Searching for codes');
 });
 
 async function renderProfile(user) {
-	const browser = await puppeteer.launch({'args': ['--no-sandbox', '--disable-setuid-sandbox']});
-	const page = await browser.newPage();
-	const svg = fs.readFileSync(__dirname + '/template.svg', 'utf8');
-	const html = `<!DOCTYPE html><html><head><style>body{margin:0px}</style></head>
-	<body>${svg.replace('[IMAGE]', user['image']).replace('[GRADE]', user['grade'])}</body></html>`;
+	if (!page)
+		page = await browser.newPage();
 
-	await page.setContent(html);
-	await page.setViewport({width: 900, height: 400});
+	const svg = fs.readFileSync(__dirname + '/template.svg', 'utf8');
+
+	await page.setContent(svg);
 
 	// Add content
-	await page.evaluate((user, colors) => {
+	let element = await page.$("svg");
+	await element.evaluate((svg, user, colors) => {
 		let rank_type = user['rating_base'].split('/').pop();
-		document.querySelector('#rank_bg').style.fill = colors.rank_colors[rank_type]['fill'];
-		document.querySelector('#rank_border').style.fill = colors.rank_colors[rank_type]['border'];
-		document.querySelector('#rank_shadow').style.fill = colors.rank_colors[rank_type]['border'];
+		svg.querySelector('#rank_bg').style.fill = colors.rank_colors[rank_type]['fill'];
+		svg.querySelector('#rank_border').style.fill = colors.rank_colors[rank_type]['border'];
+		svg.querySelector('#rank_shadow').style.fill = colors.rank_colors[rank_type]['border'];
 
-		document.querySelector('#trophy_bg').style.fill = `url(#${user['trophy_status']})`;
-		document.querySelector('#trophy_border').style.fill = colors.trophy_colors[user['trophy_status']]['border'];
-		document.querySelector('#trophy_shadow').style.fill = colors.trophy_colors[user['trophy_status']]['border'];
+		svg.querySelector('#trophy_bg').style.fill = `url(#${user['trophy_status']})`;
+		svg.querySelector('#trophy_border').style.fill = colors.trophy_colors[user['trophy_status']]['border'];
+		svg.querySelector('#trophy_shadow').style.fill = colors.trophy_colors[user['trophy_status']]['border'];
 
-		document.querySelector('#Trophy').innerHTML = user['trophy'];
-		document.querySelector('#Username').innerHTML = user['name'];
-		document.querySelector('#Rank').innerHTML = user['rating'];
-		document.querySelector('#Max_rank').innerHTML = 'MAX：' + user['rating_max'];
-		document.querySelector('#Stars').innerHTML = user['stars'];
-		document.querySelector('#Comment').innerHTML = user['comment'];
+		let imageLoad = new Promise((resolve, reject) => {
+			let image = svg.querySelector('#Image');
+			image.onload = () => resolve();
+			image.onerror = () => reject();
+			image.href.baseVal = user['image'];
+		});
+		let gradeLoad = new Promise((resolve, reject) => {
+			let grade = svg.querySelector('#Grade');
+			grade.onload = () => resolve();
+			grade.onerror = () => reject();
+			grade.href.baseVal = user['grade'];
+		});
+		svg.querySelector('#Trophy').innerHTML = user['trophy'];
+		svg.querySelector('#Username').innerHTML = user['name'];
+		svg.querySelector('#Rank').innerHTML = user['rating'];
+		svg.querySelector('#Max_rank').innerHTML = 'MAX：' + user['rating_max'];
+		svg.querySelector('#Stars').innerHTML = user['stars'];
+		svg.querySelector('#Comment').innerHTML = user['comment'];
+		return Promise.all([imageLoad, gradeLoad]);
 	}, user, colors);
 
-	await page.screenshot({path: 'temp.png', clip: {x: 0, y: 0, width: 900, height: 400}});
-	await browser.close();
+	return await element.screenshot({type: 'png'});
 }
 
 client.on('message', async message => {
@@ -64,39 +79,27 @@ client.on('message', async message => {
 	// Is a number and is in the channel to search
 	if (message.channel.id == config.channel_id && !isNaN(input)) {
 		message.channel.startTyping();
-		let intl = await getUser(input, false);
-		let jp = null;
-		if (intl == null) {
-			jp = await getUser(input, true);
-		}
+		let intl, jp;
+		let response = "Sorry I looked but I couldn't find your profile on the Japanese or International servers <:sd_salt:574629160459173909>";
 
-		if (intl == null && jp == null) {
-			message.channel.stopTyping();
-			message.channel.send("Sorry I looked but I couldn't find your profile on the Japanese or International servers <:sd_salt:574629160459173909>");
-		} else {
-			let type = '';
-			let friend_url = '';
-			let profile = null;
-			if (intl != null) {
-				profile = intl;
-				type = 'International';
-				friend_url = 'https://maimaidx-eng.com/maimai-mobile/friend/search/searchUser/?friendCode=' + input;
-			} else if (jp != null) {
-				profile = jp;
-				type = 'Japanese';
-				friend_url = 'https://maimaidx.jp/maimai-mobile/friend/search/searchUser/?friendCode=' + input;
-			}
+		if ((intl = await getUser(input, false)) != null || (jp = await getUser(input, true)) != null) {
+			let type = (intl != null ? 'International' : 'Japanese');
+			let friend_url = (intl != null ? intl_friend_url : jp_friend_url) + input;
+			let profile = intl || jp;
 
-			await renderProfile(profile);
-			let embed = new Discord.MessageEmbed()
+			response = new Discord.MessageEmbed()
 				.setTitle(`${type} profile for ${profile['name']}`)
 				.setURL(friend_url)
 				.setColor('#51bcf3')
-				.attachFiles([__dirname + '/temp.png'])
-				.setImage('attachment://temp.png');
-			message.channel.stopTyping();
-			message.channel.send(embed);
+				.attachFiles([{
+					name: 'profile.png',
+					attachment: await renderProfile(profile),
+				}])
+				.setImage('attachment://profile.png');
 		}
+
+		message.channel.stopTyping();
+		message.channel.send(response);
 	}
 });
 
