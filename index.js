@@ -27,7 +27,7 @@ client.on('ready', async () => {
 	const content = fs.readFileSync(__dirname + '/template.svg', 'utf8');
 	await page.setContent(content);
 	SVG = await page.$("svg");
-	client.user.setActivity('Searching for codes');
+	client.user.setActivity('searching for codes');
 });
 
 async function renderProfile(user) {
