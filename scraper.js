@@ -18,6 +18,10 @@ const jp_login = 'https://maimaidx.jp/maimai-mobile/';
 const jp_friend_url = 'https://maimaidx.jp/maimai-mobile/friend/search/searchUser/?friendCode=';
 
 const pageFunction = () => {
+	if (document.querySelector('.see_through_block.t_c') != null) {
+		return null;
+	}
+
 	let image = document.querySelector('.basic_block img').src;
 	let trophy_status = document.querySelector('.basic_block .trophy_block').classList[1];
 	let trophy = document.querySelector('.basic_block .trophy_inner_block span').innerText;
@@ -46,7 +50,6 @@ const pageFunction = () => {
 async function getUser(user_id, jp) {
 	const browser = await puppeteer.launch({'args': ['--no-sandbox', '--disable-setuid-sandbox']});
 	const page = await browser.newPage();
-	let user = null;
 
 	// login
 	await page.goto(jp ? jp_login : intl_login, { waitUntil: 'networkidle0' });
@@ -97,7 +100,7 @@ async function getUser(user_id, jp) {
 		}
 	}
 
-	user = await page.evaluate(pageFunction);
+	let user = await page.evaluate(pageFunction);
 	await browser.close();
 	return user;
 }
