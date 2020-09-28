@@ -28,7 +28,12 @@ const pageFunction = () => {
 	let name = document.querySelector('.basic_block .name_block').innerText;
 	let rating = document.querySelector('.basic_block .rating_block').innerText;
 	let rating_base = document.querySelector('.basic_block .f_r img').src;
-	let rating_max = document.querySelector('.basic_block .f_r .p_r_5').textContent.replace('MAX：', '');
+
+	let rating_max = '';
+	if (document.querySelector('.basic_block .f_r .p_r_5')) {
+		rating_max = document.querySelector('.basic_block .f_r .p_r_5').textContent;
+	}
+
 	let grade = document.querySelector('.basic_block img.f_l.h_25').src;
 	let stars = document.querySelector('.basic_block img.h_20').nextSibling.textContent;
 	let comment = document.querySelector('.friend_comment_block').textContent.trim();

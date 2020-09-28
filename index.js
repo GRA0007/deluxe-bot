@@ -57,7 +57,7 @@ async function renderProfile(user) {
 		element.querySelector('#Trophy').innerHTML = user['trophy'];
 		element.querySelector('#Username').innerHTML = user['name'];
 		element.querySelector('#Rank').innerHTML = user['rating'];
-		element.querySelector('#Max_rank').innerHTML = 'MAX：' + user['rating_max'];
+		element.querySelector('#Max_rank').innerHTML = user['rating_max'];
 		element.querySelector('#Stars').innerHTML = user['stars'];
 		element.querySelector('#Comment').innerHTML = user['comment'];
 		return Promise.all([imageLoad, gradeLoad]);
