@@ -18,11 +18,11 @@ const jp_login = 'https://maimaidx.jp/maimai-mobile/';
 const jp_friend_url = 'https://maimaidx.jp/maimai-mobile/friend/search/searchUser/?friendCode=';
 
 const pageFunction = () => {
-	if (document.querySelector('.basic_block') != null) {
+	if (document.querySelector('.basic_block') == null) {
 		return null;
 	}
 
-	let image = document.querySelector('.basic_block img').src;
+	let image = document.querySelector('.basic_block > img').src;
 	let trophy_status = document.querySelector('.basic_block .trophy_block').classList[1];
 	let trophy = document.querySelector('.basic_block .trophy_inner_block span').innerText;
 	let name = document.querySelector('.basic_block .name_block').innerText;
