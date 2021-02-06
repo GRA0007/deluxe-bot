@@ -18,7 +18,7 @@ const jp_login = 'https://maimaidx.jp/maimai-mobile/';
 const jp_friend_url = 'https://maimaidx.jp/maimai-mobile/friend/search/searchUser/?friendCode=';
 
 const pageFunction = () => {
-	if (document.querySelector('.see_through_block.t_c') != null) {
+	if (document.querySelector('.basic_block') != null) {
 		return null;
 	}
 
@@ -105,7 +105,7 @@ async function getUser(user_id, jp) {
 		}
 	}
 
-	let user = null;
+	let user = 'error';
 	try {
 		user = await page.evaluate(pageFunction);
 	} catch (e) {

@@ -77,22 +77,27 @@ client.on('message', async message => {
 		let intl, jp;
 		let response = "Sorry I looked but I couldn't find your profile on the Japanese or International servers <:sd_salt:574629160459173909>";
 
-		if ((intl = await getUser(input, false)) != null || (jp = await getUser(input, true)) != null) {
+		if (
+			(intl = await getUser(input, false)) != null
+			|| (jp = await getUser(input, true)) != null
+		) {
 			let type = (intl != null ? 'International' : 'Japanese');
 			let friend_url = (intl != null ? intl_friend_url : jp_friend_url) + input;
 			let profile = intl || jp;
 
-			response = new Discord.MessageEmbed()
-				.setTitle(`${type} profile for ${profile['name']}`)
-				.setURL(friend_url)
-				.setColor('#51bcf3')
-				.attachFiles([{
-					name: 'profile.png',
-					attachment: await renderProfile(profile),
-				}])
-				.setImage('attachment://profile.png');
-		} else {
-			response = "Sorry something went wrong fetching your profile. Pinging <@183911061496266752>.";
+			if (profile !== 'error') {
+				response = new Discord.MessageEmbed()
+					.setTitle(`${type} profile for ${profile['name']}`)
+					.setURL(friend_url)
+					.setColor('#51bcf3')
+					.attachFiles([{
+						name: 'profile.png',
+						attachment: await renderProfile(profile),
+					}])
+					.setImage('attachment://profile.png');
+			} else {
+				response = "Sorry something went wrong fetching your profile. Pinging <@183911061496266752>.";
+			}
 		}
 
 		message.channel.stopTyping();
