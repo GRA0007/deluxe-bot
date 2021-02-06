@@ -72,7 +72,7 @@ client.on('message', async message => {
 	let input = message.content.trim();
 
 	// Is a number and is in the channel to search
-	if (message.channel.id == config.channel_id && !isNaN(input)) {
+	if (message.channel.id == config.channel_id && !isNaN(input) && input.length === 13) {
 		message.channel.startTyping();
 		let intl, jp;
 		let response = "Sorry I looked but I couldn't find your profile on the Japanese or International servers <:sd_salt:574629160459173909>";
@@ -91,6 +91,8 @@ client.on('message', async message => {
 					attachment: await renderProfile(profile),
 				}])
 				.setImage('attachment://profile.png');
+		} else {
+			response = "Sorry something went wrong fetching your profile. Pinging <@183911061496266752>.";
 		}
 
 		message.channel.stopTyping();

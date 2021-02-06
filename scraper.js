@@ -105,7 +105,12 @@ async function getUser(user_id, jp) {
 		}
 	}
 
-	let user = await page.evaluate(pageFunction);
+	let user = null;
+	try {
+		user = await page.evaluate(pageFunction);
+	} catch (e) {
+		console.error(e);
+	}
 	await browser.close();
 	return user;
 }
